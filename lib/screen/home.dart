@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -64,16 +62,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget displaySelectedImages() {
-    return SizedBox(
+    return Container(
       height: 225,
       width: 365,
-      child: selectedImage != null // Check for a selected image
+      child: selectedImage != null
           ? ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(15)),
               child: Image.file(selectedImage!, fit: BoxFit.cover),
             )
-          : const Center(
-              child: Icon(Icons.image_rounded)), // Display placeholder
+          : const Center(child: Icon(Icons.image_rounded)),
     );
   }
 
@@ -101,7 +98,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ],
       ),
       body: selectedImage != null
-          ? displaySelectedImages()
+          ? Container(
+              margin: EdgeInsets.only(top: 15),
+              alignment: Alignment.topCenter,
+              child: displaySelectedImages(),
+            )
           : Center(
               child: Image.asset(
                 'assets/images/noimage.png',
@@ -117,6 +118,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return SpeedDial(
       animatedIcon: AnimatedIcons.menu_close,
       openCloseDial: expandedValue,
+      buttonSize: const Size(65, 65),
       onOpen: () => setState(() => expandedValue.value = true),
       onClose: () => setState(() => expandedValue.value = false),
       children: [
