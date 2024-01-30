@@ -43,6 +43,26 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     }
   }
 
+  Future<File?> getImageFromCamera() async {
+    final pickedFile = await picker.pickImage(
+      imageQuality: 100,
+      maxHeight: 1000,
+      maxWidth: 1000,
+      source: ImageSource.camera, // Specify camera as the source
+    );
+
+    if (pickedFile != null) {
+      selectedImages.add(File(pickedFile.path));
+      setState(() {});
+      return selectedImages[0];
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No image captured')),
+      );
+      return null;
+    }
+  }
+
   Widget displaySelectedImages() {
     return SizedBox(
       height: 225,
@@ -155,7 +175,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         SpeedDialChild(
           child: const Icon(Icons.camera_alt),
           label: 'Camera',
-          onTap: null,
+          onTap: getImageFromCamera,
         ),
         SpeedDialChild(
           child: const Icon(Icons.photo_library),
