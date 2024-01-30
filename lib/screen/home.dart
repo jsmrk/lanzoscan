@@ -63,8 +63,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget displaySelectedImages() {
     return Container(
-      height: 225,
-      width: 365,
+      height: 325,
+      width: 335,
       child: selectedImage != null
           ? ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -77,31 +77,65 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        shadowColor: Colors.black,
-        elevation: 1,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 15),
-          child: Image.asset(
-            'assets/images/logo2.png',
-            fit: BoxFit.scaleDown,
-          ),
-        ),
-        leadingWidth: 185,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.question_mark_rounded,
-            ),
-          ),
-        ],
-      ),
+      appBar: selectedImage == null // Conditionally display AppBar
+          ? AppBar(
+              shadowColor: Colors.black,
+              elevation: 1,
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 15),
+                child: Image.asset(
+                  'assets/images/logo2.png',
+                  fit: BoxFit.scaleDown,
+                ),
+              ),
+              leadingWidth: 185,
+              actions: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.question_mark_rounded,
+                  ),
+                ),
+              ],
+            )
+          : null,
       body: selectedImage != null
-          ? Container(
-              margin: EdgeInsets.only(top: 15),
-              alignment: Alignment.topCenter,
-              child: displaySelectedImages(),
+          ? Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 105),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.scaleDown,
+                    height: 125,
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 15),
+                  alignment: Alignment.topCenter,
+                  child: displaySelectedImages(),
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    'Scan Now',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
             )
           : Center(
               child: Image.asset(
