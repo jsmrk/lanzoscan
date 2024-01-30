@@ -20,21 +20,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   final picker = ImagePicker();
   int _currentImageIndex = 0;
-  List<File> selectedImages = [];
+
+  File? selectedImage;
 
   Future<File?> getImageFromGallery() async {
     final pickedFile = await picker.pickImage(
       imageQuality: 100,
       maxHeight: 1000,
       maxWidth: 1000,
-      source: ImageSource.gallery, // Specify source as gallery (or camera)
+      source: ImageSource.gallery,
     );
 
     if (pickedFile != null) {
-      selectedImages
-          .add(File(pickedFile.path)); // Add the single image to the list
-      setState(() {}); // Trigger UI update
-      return selectedImages[0]; // Return the selected image
+      selectedImage = File(pickedFile.path);
+      setState(() {});
+      return selectedImage;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No image selected')),
@@ -48,16 +48,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       imageQuality: 100,
       maxHeight: 1000,
       maxWidth: 1000,
-      source: ImageSource.camera, // Specify camera as the source
+      source: ImageSource.camera,
     );
 
     if (pickedFile != null) {
-      selectedImages.add(File(pickedFile.path));
+      selectedImage = File(pickedFile.path);
       setState(() {});
-      return selectedImages[0];
+      return selectedImage;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No image captured')),
+        const SnackBar(content: Text('No image selected')),
       );
       return null;
     }
@@ -67,65 +67,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return SizedBox(
       height: 225,
       width: 365,
-      child: selectedImages.isEmpty
-          ? const Center(child: Icon(Icons.image_rounded))
-          : Stack(
-              children: [
-                // PageView for sliding images
-                PageView.builder(
-                  itemCount: selectedImages.length,
-                  scrollDirection: Axis.horizontal,
-                  onPageChanged: (int newPageIndex) {
-                    setState(() {
-                      _currentImageIndex = newPageIndex;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 1),
-                        child: kIsWeb
-                            ? ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(15)),
-                                child: Image.network(
-                                  selectedImages[index].path,
-                                  fit: BoxFit.cover,
-                                ))
-                            : ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(15)),
-                                child: Image.file(selectedImages[index],
-                                    fit: BoxFit.cover),
-                              ));
-                  },
-                ),
-
-                // Dots for multiple images
-                if (selectedImages.length > 1)
-                  Positioned(
-                    bottom: 11,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        selectedImages.length,
-                        (index) => Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 5),
-                          width: 11,
-                          height: 11,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: index == _currentImageIndex
-                                ? Colors.green
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+      child: selectedImage != null // Check for a selected image
+          ? ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              child: Image.file(selectedImage!, fit: BoxFit.cover),
+            )
+          : const Center(
+              child: Icon(Icons.image_rounded)), // Display placeholder
     );
   }
 
@@ -152,7 +100,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
-      body: selectedImages.isNotEmpty
+      body: selectedImage != null
           ? displaySelectedImages()
           : Center(
               child: Image.asset(
