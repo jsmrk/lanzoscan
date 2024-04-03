@@ -77,7 +77,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: selectedImage == null // Conditionally display AppBar
+      appBar: selectedImage == null
           ? AppBar(
               shadowColor: Colors.black,
               elevation: 1,
@@ -144,7 +144,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 fit: BoxFit.scaleDown,
               ),
             ),
-      floatingActionButton: _buildFloatingButton(),
+      floatingActionButton:
+          selectedImage != null ? null : _buildFloatingButton(),
     );
   }
 
