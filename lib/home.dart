@@ -168,7 +168,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ? Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top: 105),
+                  margin: const EdgeInsets.only(top: 75),
                   child: Image.asset(
                     'assets/images/logo.png',
                     fit: BoxFit.scaleDown,

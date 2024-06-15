@@ -1,6 +1,6 @@
 const List<String> labels = [
-  'algal-leaf',
-  'healthy',
-  'leaf-blight',
-  'powdery-mildew'
+  'Algal Leaf',
+  'Healthy',
+  'Leaf Blight',
+  'Powdery Mildew'
 ];
