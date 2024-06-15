@@ -47,19 +47,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     numClasses,
   );
 
-  // Widget displaySelectedImages() {
-  //   return Container(
-  //     height: 325,
-  //     width: 335,
-  //     child: imageFile != null
-  //         ? ClipRRect(
-  //             borderRadius: const BorderRadius.all(Radius.circular(15)),
-  //             child: Image.file(imageFile!, fit: BoxFit.cover),
-  //           )
-  //         : const Center(child: Icon(Icons.image_rounded)),
-  //   );
-  // }
-
   Future<File?> getImageFromGallery() async {
     final XFile? newImageFile =
         await picker.pickImage(source: ImageSource.gallery);
@@ -76,8 +63,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No image selected')),
       );
-      return null;
     }
+    return null;
   }
 
   Future<File?> getImageFromCamera() async {
@@ -96,8 +83,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No image selected')),
       );
-      return null;
     }
+    return null;
   }
 
   @override
@@ -142,59 +129,68 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     }
 
     return Scaffold(
-      appBar: imageFile == null
-          ? AppBar(
-              shadowColor: Colors.black,
-              elevation: 1,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: Image.asset(
-                  'assets/images/logo2.png',
-                  fit: BoxFit.scaleDown,
-                ),
-              ),
-              leadingWidth: 185,
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.question_mark_rounded,
-                  ),
-                ),
-              ],
-            )
-          : null,
+      appBar: AppBar(
+        shadowColor: Colors.black,
+        elevation: 1,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 15),
+          child: Image.asset(
+            'assets/images/logo2.png',
+            fit: BoxFit.scaleDown,
+          ),
+        ),
+        leadingWidth: 185,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.menu_book_rounded),
+          ),
+        ],
+      ),
       body: imageFile != null
           ? Column(
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 75),
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.scaleDown,
-                    height: 125,
-                  ),
+                const SizedBox(
+                  height: 10,
                 ),
-                Container(
-                  margin: const EdgeInsets.only(top: 15),
-                  alignment: Alignment.topCenter,
-                  child: Center(
+                Center(
                     child: SizedBox(
-                      height: maxImageWidgetHeight,
-                      child: Center(
+                  height: maxImageWidgetHeight,
+                  child: Padding(
+                      padding: const EdgeInsets.all(25),
+                      child: ClipRRect(
+                        borderRadius: BorderRadiusDirectional.circular(25),
                         child: Stack(
                           children: [
                             if (imageFile != null) Image.file(imageFile!),
-                            ...bboxesWidgets,
+                            // ...bboxesWidgets,
                           ],
                         ),
-                      ),
-                    ),
+                      )),
+                )),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 35, vertical: 5),
+                  child: Text(
+                    "Result: ${labels[classes[0]].toString()}",
+                    style: const TextStyle(
+                        fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(
-                  height: 25,
-                ),
+                Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 35, vertical: 15),
+                    child: CircleAvatar(
+                        backgroundColor: Colors.green[100],
+                        radius: 80,
+                        child: CircleAvatar(
+                          radius: 65,
+                          child: Text(
+                            "${(scores[0] * 100).truncate()}%",
+                            style: const TextStyle(
+                                fontSize: 35, fontWeight: FontWeight.bold),
+                          ),
+                        ))),
               ],
             )
           : Center(
@@ -204,7 +200,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 fit: BoxFit.scaleDown,
               ),
             ),
-      floatingActionButton: imageFile != null ? null : _buildFloatingButton(),
+      floatingActionButton: _buildFloatingButton(),
     );
   }
 

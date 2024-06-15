@@ -41,7 +41,7 @@ class Bbox extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(label),
-                  Text(' ${(score * 100).toStringAsFixed(0)}%'),
+                  // Text(' ${(score * 100).toStringAsFixed(0)}%'),
                 ],
               ),
             ),
