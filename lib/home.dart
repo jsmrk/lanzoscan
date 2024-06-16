@@ -24,8 +24,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   static const inModelHeight = 640;
   static const numClasses = 4;
 
-  double confidenceThreshold = 0.4;
-  double iouThreshold = 0.1;
+  double confidenceThreshold = 0.5;
+  double iouThreshold = 0.25;
 
   File? imageFile;
   final ImagePicker picker = ImagePicker();
@@ -38,7 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int? imageWidth;
   int? imageHeight;
 
-  static const double maxImageWidgetHeight = 400;
+  static const double maxImageWidgetHeight = 500;
 
   final YoloModel model = YoloModel(
     'assets/models/yolov8n.tflite',
@@ -150,9 +150,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       body: imageFile != null
           ? Column(
               children: [
-                const SizedBox(
-                  height: 10,
-                ),
                 Center(
                     child: SizedBox(
                   height: maxImageWidgetHeight,
@@ -160,9 +157,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       padding: const EdgeInsets.all(25),
                       child: ClipRRect(
                         borderRadius: BorderRadiusDirectional.circular(25),
+                        clipBehavior: Clip.hardEdge,
                         child: Stack(
+                          fit: StackFit.expand,
                           children: [
-                            if (imageFile != null) Image.file(imageFile!),
+                            if (imageFile != null)
+                              Image.file(
+                                imageFile!,
+                                fit: BoxFit.cover,
+                              ),
                             // ...bboxesWidgets,
                           ],
                         ),
@@ -182,9 +185,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         horizontal: 35, vertical: 15),
                     child: CircleAvatar(
                         backgroundColor: Colors.green[100],
-                        radius: 80,
+                        radius: 60,
                         child: CircleAvatar(
-                          radius: 65,
+                          radius: 45,
                           child: Text(
                             "${(scores[0] * 100).truncate()}%",
                             style: const TextStyle(

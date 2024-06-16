@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'LanzoScan',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFFEE5A2)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0x0ffee5a2)),
         useMaterial3: true,
       ),
       home: const Home(),

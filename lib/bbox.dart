@@ -37,10 +37,10 @@ class Bbox extends StatelessWidget {
           child: FittedBox(
             child: Container(
               color: color,
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(label),
+                  // Text(label),
                   // Text(' ${(score * 100).toStringAsFixed(0)}%'),
                 ],
               ),
