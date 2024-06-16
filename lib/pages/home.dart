@@ -8,6 +8,7 @@ import 'package:lanzoscan/model/bbox.dart';
 import 'package:lanzoscan/label/labels.dart';
 import 'package:lanzoscan/model/yolo.dart';
 import 'package:lanzoscan/pages/library.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 enum Choice { camera, gallery }
 
@@ -21,12 +22,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   ValueNotifier<bool> expandedValue = ValueNotifier(false);
 
+  bool isLoading = false;
+
   static const inModelWidth = 640;
   static const inModelHeight = 640;
   static const numClasses = 4;
 
-  double confidenceThreshold = 0.5;
-  double iouThreshold = 0.25;
+  double confidenceThreshold = 0.25;
+  double iouThreshold = 0.45;
 
   File? imageFile;
   final ImagePicker picker = ImagePicker();
@@ -48,18 +51,32 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     numClasses,
   );
 
+  Future<void> showDelayedLoading() async {
+    await Future.delayed(const Duration(seconds: 3));
+    setState(() {
+      isLoading = false; // Hide loading indicator after 3 seconds
+    });
+  }
+
   Future<File?> getImageFromGallery() async {
+    () => setState(
+          () {},
+        );
     final XFile? newImageFile =
         await picker.pickImage(source: ImageSource.gallery);
     if (newImageFile != null) {
       setState(() {
         imageFile = File(newImageFile.path);
+        isLoading = true;
       });
+
       final image = img.decodeImage(await newImageFile.readAsBytes())!;
       imageWidth = image.width;
       imageHeight = image.height;
       inferenceOutput = model.infer(image);
       updatePostprocess();
+
+      showDelayedLoading();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No image selected')),
@@ -74,12 +91,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     if (newImageFile != null) {
       setState(() {
         imageFile = File(newImageFile.path);
+        isLoading = true;
       });
+
       final image = img.decodeImage(await newImageFile.readAsBytes())!;
       imageWidth = image.width;
       imageHeight = image.height;
       inferenceOutput = model.infer(image);
       updatePostprocess();
+
+      showDelayedLoading();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No image selected')),
@@ -149,66 +170,111 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 MaterialPageRoute(builder: (context) => const LanzoScanWiki()),
               );
             },
-            icon: const Icon(Icons.menu_book_rounded),
+            icon: const Icon(
+              Icons.menu_book_rounded,
+              size: 30,
+            ),
           ),
         ],
       ),
-      body: imageFile != null
-          ? Column(
-              children: [
-                Center(
-                    child: SizedBox(
-                  height: maxImageWidgetHeight,
-                  child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: ClipRRect(
-                        borderRadius: BorderRadiusDirectional.circular(25),
-                        clipBehavior: Clip.hardEdge,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (imageFile != null)
-                              Image.file(
-                                imageFile!,
-                                fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          imageFile != null
+              ? Column(
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        height: maxImageWidgetHeight,
+                        child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadiusDirectional.circular(25),
+                              clipBehavior: Clip.hardEdge,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  if (imageFile != null)
+                                    Image.file(
+                                      imageFile!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  // ...bboxesWidgets,
+                                ],
                               ),
-                            // ...bboxesWidgets,
-                          ],
-                        ),
-                      )),
-                )),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 35, vertical: 5),
-                  child: Text(
-                    "Result: ${labels[classes[0]].toString()}",
-                    style: const TextStyle(
-                        fontSize: 25, fontWeight: FontWeight.bold),
+                            )),
+                      ),
+                    ),
+                    Container(
+                      child: bboxesWidgets.isNotEmpty
+                          ? Column(
+                              children: [
+                                Text(
+                                  labels[classes[0]].toString(),
+                                  style: const TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 35, vertical: 15),
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.green[100],
+                                    radius: 60,
+                                    child: CircleAvatar(
+                                      radius: 45,
+                                      child: Text(
+                                        "${(scores[0] * 100).truncate()}%",
+                                        style: const TextStyle(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : const SizedBox(), // Display an empty SizedBox if no labels detected
+                    ),
+                  ],
+                )
+              : Center(
+                  child: Image.asset(
+                    'assets/images/noimage.png',
+                    height: 255,
+                    fit: BoxFit.scaleDown,
                   ),
                 ),
-                Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 35, vertical: 15),
-                    child: CircleAvatar(
-                        backgroundColor: Colors.green[100],
-                        radius: 60,
-                        child: CircleAvatar(
-                          radius: 45,
-                          child: Text(
-                            "${(scores[0] * 100).truncate()}%",
-                            style: const TextStyle(
-                                fontSize: 35, fontWeight: FontWeight.bold),
-                          ),
-                        ))),
-              ],
-            )
-          : Center(
-              child: Image.asset(
-                'assets/images/noimage.png',
-                height: 255,
-                fit: BoxFit.scaleDown,
+          Visibility(
+            visible: isLoading, // Show loading indicator when loading
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 15),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.scaleDown,
+                      height: 125,
+                    ),
+                  ),
+                  const Text(
+                    'is now scanning',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const SpinKitPouringHourGlassRefined(color: Colors.amber),
+                ],
               ),
             ),
+          ),
+        ],
+      ),
       floatingActionButton: _buildFloatingButton(),
     );
   }
