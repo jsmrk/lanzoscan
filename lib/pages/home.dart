@@ -9,6 +9,7 @@ import 'package:lanzoscan/label/labels.dart';
 import 'package:lanzoscan/model/yolo.dart';
 import 'package:lanzoscan/pages/library.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 enum Choice { camera, gallery }
 
@@ -205,37 +206,48 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                             )),
                       ),
                     ),
-                    Container(
-                      child: bboxesWidgets.isNotEmpty
-                          ? Column(
-                              children: [
-                                Text(
-                                  labels[classes[0]].toString(),
-                                  style: const TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 35, vertical: 15),
-                                  child: CircleAvatar(
-                                    backgroundColor: Colors.green[100],
-                                    radius: 60,
-                                    child: CircleAvatar(
-                                      radius: 45,
-                                      child: Text(
-                                        "${(scores[0] * 100).truncate()}%",
-                                        style: const TextStyle(
-                                            fontSize: 35,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )
-                          : const SizedBox(), // Display an empty SizedBox if no labels detected
+                    const SizedBox(
+                      height: 15,
                     ),
+                    Container(
+                        child: isLoading
+                            ? const SizedBox()
+                            : Container(
+                                child: bboxesWidgets.isNotEmpty
+                                    ? Column(
+                                        children: [
+                                          Text(
+                                            labels[classes[0]].toString(),
+                                            style: const TextStyle(
+                                                fontSize: 35,
+                                                fontWeight: FontWeight.w900),
+                                          ),
+                                          const SizedBox(
+                                            height: 5,
+                                          ),
+                                          CircularPercentIndicator(
+                                            radius: 65.0,
+                                            animation: true,
+                                            animationDuration: 1300,
+                                            restartAnimation: true,
+                                            lineWidth: 15.0,
+                                            addAutomaticKeepAlive: true,
+                                            percent: scores[0].toDouble(),
+                                            center: Text(
+                                              "${(scores[0] * 100).truncate()}%",
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20.0),
+                                            ),
+                                            circularStrokeCap:
+                                                CircularStrokeCap.butt,
+                                            backgroundColor: Colors.grey,
+                                            progressColor: Colors.amber[200],
+                                          ),
+                                        ],
+                                      )
+                                    : const SizedBox(), // Display an empty SizedBox if no labels detected
+                              ))
                   ],
                 )
               : Center(
