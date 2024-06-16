@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:lanzoscan/nms.dart';
+import 'package:lanzoscan/model/nms.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart';
 

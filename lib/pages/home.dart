@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:lanzoscan/bbox.dart';
-import 'package:lanzoscan/labels.dart';
-import 'package:lanzoscan/yolo.dart';
+import 'package:lanzoscan/model/bbox.dart';
+import 'package:lanzoscan/label/labels.dart';
+import 'package:lanzoscan/model/yolo.dart';
+import 'package:lanzoscan/pages/library.dart';
 
 enum Choice { camera, gallery }
 
@@ -142,7 +143,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         leadingWidth: 185,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LanzoScanWiki()),
+              );
+            },
             icon: const Icon(Icons.menu_book_rounded),
           ),
         ],
@@ -154,7 +160,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     child: SizedBox(
                   height: maxImageWidgetHeight,
                   child: Padding(
-                      padding: const EdgeInsets.all(25),
+                      padding: const EdgeInsets.all(15),
                       child: ClipRRect(
                         borderRadius: BorderRadiusDirectional.circular(25),
                         clipBehavior: Clip.hardEdge,

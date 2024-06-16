@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lanzoscan/home.dart';
+import 'package:lanzoscan/pages/home.dart';
 
 void main() {
   runApp(const MyApp());
