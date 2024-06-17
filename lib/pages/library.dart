@@ -32,10 +32,10 @@ class LanzoScanWiki extends StatelessWidget {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.only(top: 5, left: 15, right: 15),
+                padding: EdgeInsets.only(top: 5, left: 25, right: 25),
                 child: Text(
-                  "Lanzones trees are susceptible to several leaf diseases that can significantly impact their health and fruit yield. These diseases, like algal leaf spot, leaf blight, and powdery mildew, manifest as brown spots, premature leaf drop, and stunted growth. Early detection and proper management practices, including fungicides, improved sanitation, and optimized irrigation, are essential to safeguard your Lanzones crop and ensure a bountiful harvest.",
-                  textAlign: TextAlign.center,
+                  "Lanzones trees can suffer from leaf diseases such as algal leaf spot, leaf blight, and powdery mildew. These cause brown spots, early leaf drop, and stunted growth. To protect your crop and ensure a good harvest, use early detection, fungicides, good sanitation, and proper irrigation.",
+                  textAlign: TextAlign.justify,
                   style: TextStyle(fontSize: 17),
                 ),
               ),

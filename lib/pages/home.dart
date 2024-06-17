@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
+import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -10,6 +14,7 @@ import 'package:lanzoscan/model/yolo.dart';
 import 'package:lanzoscan/pages/library.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:gal/gal.dart';
 
 enum Choice { camera, gallery }
 
@@ -24,6 +29,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   ValueNotifier<bool> expandedValue = ValueNotifier(false);
 
   bool isLoading = false;
+  bool isResultSaved = false;
 
   static const inModelWidth = 640;
   static const inModelHeight = 640;
@@ -43,7 +49,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int? imageWidth;
   int? imageHeight;
 
-  static const double maxImageWidgetHeight = 500;
+  static const double maxImageWidgetHeight = 400;
+
+  WidgetsToImageController controller = WidgetsToImageController();
+  // to save image bytes of widget
+  Uint8List? bytes;
+
+  Widget buildImage(Uint8List bytes) => Image.memory(bytes);
+
+  final RoundedLoadingButtonController btnController =
+      RoundedLoadingButtonController();
 
   final YoloModel model = YoloModel(
     'assets/models/yolov8n.tflite',
@@ -53,16 +68,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   );
 
   Future<void> showDelayedLoading() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
     setState(() {
-      isLoading = false; // Hide loading indicator after 3 seconds
+      isLoading = false;
     });
   }
 
   Future<File?> getImageFromGallery() async {
-    () => setState(
-          () {},
-        );
     final XFile? newImageFile =
         await picker.pickImage(source: ImageSource.gallery);
     if (newImageFile != null) {
@@ -70,13 +82,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         imageFile = File(newImageFile.path);
         isLoading = true;
       });
-
       final image = img.decodeImage(await newImageFile.readAsBytes())!;
       imageWidth = image.width;
       imageHeight = image.height;
       inferenceOutput = model.infer(image);
       updatePostprocess();
-
+      // setState(() {
+      //   isLoading = false;
+      // });
       showDelayedLoading();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +113,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       imageHeight = image.height;
       inferenceOutput = model.infer(image);
       updatePostprocess();
-
+      // setState(() {
+      //   isLoading = false;
+      // });
       showDelayedLoading();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,6 +125,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return null;
   }
 
+  // Future<Uint8List> scanResult() async {
+  //   Uint8List? bytes;
+  //   final bytes = await controller.capture();
+  //   setState(() {
+  //     this.bytes = bytes;
+  //   });
+  // }
+
+  final bboxesColors = List<Color>.generate(
+    numClasses,
+    (_) => Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -118,11 +146,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final bboxesColors = List<Color>.generate(
-      numClasses,
-      (_) => Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),
-    );
-
     // final ImagePicker picker = ImagePicker();
 
     final double displayWidth = MediaQuery.of(context).size.width;
@@ -150,6 +173,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             bboxesColors[boxClass]),
       );
     }
+
+    WidgetsToImageController controller = WidgetsToImageController();
+    // to save image bytes of widget
 
     return Scaffold(
       appBar: AppBar(
@@ -183,71 +209,47 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           imageFile != null
               ? Column(
                   children: [
-                    Center(
-                      child: SizedBox(
-                        height: maxImageWidgetHeight,
-                        child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadiusDirectional.circular(25),
-                              clipBehavior: Clip.hardEdge,
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  if (imageFile != null)
-                                    Image.file(
-                                      imageFile!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  // ...bboxesWidgets,
-                                ],
-                              ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    WidgetsToImage(
+                      controller: controller,
+                      child: resultWidget(bboxesWidgets),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 105),
+                      child: IconButton(
+                        onPressed: () async {
+                          final bytes = await controller.capture();
+                          setState(() {
+                            this.bytes = bytes;
+                          });
+                          await Gal.putImageBytes(bytes!);
+                          buildImage(bytes);
+                          isResultSaved = true;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Image Result Saved')));
+                        },
+                        icon: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(15))),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 25, vertical: 10),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.save),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("Save to Gallery")
+                              ],
                             )),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Container(
-                        child: isLoading
-                            ? const SizedBox()
-                            : Container(
-                                child: bboxesWidgets.isNotEmpty
-                                    ? Column(
-                                        children: [
-                                          Text(
-                                            labels[classes[0]].toString(),
-                                            style: const TextStyle(
-                                                fontSize: 35,
-                                                fontWeight: FontWeight.w900),
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          CircularPercentIndicator(
-                                            radius: 65.0,
-                                            animation: true,
-                                            animationDuration: 1300,
-                                            restartAnimation: true,
-                                            lineWidth: 15.0,
-                                            addAutomaticKeepAlive: true,
-                                            percent: scores[0].toDouble(),
-                                            center: Text(
-                                              "${(scores[0] * 100).truncate()}%",
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20.0),
-                                            ),
-                                            circularStrokeCap:
-                                                CircularStrokeCap.butt,
-                                            backgroundColor: Colors.grey,
-                                            progressColor: Colors.amber[200],
-                                          ),
-                                        ],
-                                      )
-                                    : const SizedBox(), // Display an empty SizedBox if no labels detected
-                              ))
+                    )
                   ],
                 )
               : Center(
@@ -288,6 +290,85 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ],
       ),
       floatingActionButton: _buildFloatingButton(),
+    );
+  }
+
+  Widget resultWidget(bboxesWidgets) {
+    return WidgetsToImage(
+      controller: controller,
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            Center(
+              child: SizedBox(
+                height: maxImageWidgetHeight,
+                child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusDirectional.circular(25),
+                      clipBehavior: Clip.hardEdge,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (imageFile != null)
+                            Image.file(
+                              imageFile!,
+                              fit: BoxFit.cover,
+                            ),
+                          ...bboxesWidgets,
+                        ],
+                      ),
+                    )),
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Container(
+                child: isLoading
+                    ? const SizedBox()
+                    : Container(
+                        child: bboxesWidgets.isNotEmpty
+                            ? Column(
+                                children: [
+                                  Text(
+                                    labels[classes[0]].toString(),
+                                    style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w900),
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  CircularPercentIndicator(
+                                    radius: 65.0,
+                                    animation: true,
+                                    animationDuration: 1300,
+                                    restartAnimation: true,
+                                    lineWidth: 25.0,
+                                    addAutomaticKeepAlive: true,
+                                    percent: scores[0].toDouble(),
+                                    center: Text(
+                                      "${(scores[0] * 100).toStringAsFixed(0)}%",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0),
+                                    ),
+                                    circularStrokeCap: CircularStrokeCap.butt,
+                                    backgroundColor: Colors.grey,
+                                    progressColor: Colors.amber[200],
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              )
+                            : const SizedBox(), // Display an empty SizedBox if no labels detected
+                      ))
+          ],
+        ),
+      ),
     );
   }
 
