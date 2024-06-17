@@ -19,6 +19,8 @@ dependencies:
   accordion: ^2.6.0
   flutter_spinkit: ^5.2.1
   percent_indicator: ^4.2.3
+  widgets_to_image: ^1.0.0
+  gal: ^2.3.0
 
 dev_dependencies:
   flutter_test:
