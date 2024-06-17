@@ -155,7 +155,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     List<Bbox> bboxesWidgets = [];
     for (int i = 0; i < bboxes.length; i++) {
-      final box = bboxes[i];
+      final box = bboxes[0];
       final boxClass = classes[i];
       bboxesWidgets.add(
         Bbox(

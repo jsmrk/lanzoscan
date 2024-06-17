@@ -32,21 +32,21 @@ class Bbox extends StatelessWidget {
           border: Border.all(color: color, width: 3),
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: FittedBox(
-            child: Container(
-              color: color,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(label),
-                  Text(' ${(score * 100).toStringAsFixed(0)}%'),
-                ],
-              ),
-            ),
-          ),
-        ),
+        // child: Align(
+        //   alignment: Alignment.topLeft,
+        //   child: FittedBox(
+        //     child: Container(
+        //       color: color,
+        //       child: Row(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: <Widget>[
+        //           Text(label),
+        //           Text(' ${(score * 100).toStringAsFixed(0)}%'),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ),
     );
   }
