@@ -74,8 +74,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         await picker.pickImage(source: ImageSource.gallery);
     if (newImageFile != null) {
       setState(() {
-        imageFile = File(newImageFile.path);
         isLoading = true;
+        imageFile = File(newImageFile.path);
       });
       final image = img.decodeImage(await newImageFile.readAsBytes())!;
       imageWidth = image.width;
@@ -99,8 +99,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         await picker.pickImage(source: ImageSource.camera);
     if (newImageFile != null) {
       setState(() {
-        imageFile = File(newImageFile.path);
         isLoading = true;
+        imageFile = File(newImageFile.path);
       });
 
       final image = img.decodeImage(await newImageFile.readAsBytes())!;
@@ -231,8 +231,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 color: Colors.grey[300],
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(15))),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -299,17 +298,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: SizedBox(
                 height: maxImageWidgetHeight,
                 child: Padding(
-                    padding: const EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(0),
                     child: ClipRRect(
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
-                        fit: StackFit.expand,
+                        // fit: StackFit.expand,
                         children: [
                           if (imageFile != null)
                             Image.file(
                               imageFile!,
-                              fit: BoxFit.cover,
+                              // fit: BoxFit.cover,
                             ),
                           ...bboxesWidgets,
                         ],
