@@ -164,13 +164,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       final boxClass = classes[i];
       bboxesWidgets.add(
         Bbox(
-          box[0] * resizeFactor,
-          box[1] * resizeFactor,
-          box[2] * resizeFactor,
-          box[3] * resizeFactor,
-          scores[i], // Pass only the score
-          bboxesColors[boxClass],
-        ),
+            box[0] * resizeFactor,
+            box[1] * resizeFactor,
+            box[2] * resizeFactor,
+            box[3] * resizeFactor,
+            labels[boxClass],
+            scores[i],
+            bboxesColors[boxClass]),
       );
     }
 
@@ -347,12 +347,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
+
                         // fit: StackFit.expand,
+
                         children: [
                           if (imageFile != null)
                             Image.file(
                               imageFile!,
                               // fit: BoxFit.cover,
+
                             ),
                           ...bboxesWidgets,
                         ],
