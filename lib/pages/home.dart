@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
+import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -54,6 +57,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Uint8List? bytes;
 
   Widget buildImage(Uint8List bytes) => Image.memory(bytes);
+
 
   final YoloModel model = YoloModel(
     'assets/models/yolov8n.tflite',
@@ -231,7 +235,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 color: Colors.grey[300],
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(15))),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 25, vertical: 10),
+
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -298,17 +305,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: SizedBox(
                 height: maxImageWidgetHeight,
                 child: Padding(
-                    padding: const EdgeInsets.all(0),
+
+                    padding: const EdgeInsets.all(15),
+
                     child: ClipRRect(
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
-                        // fit: StackFit.expand,
+                        fit: StackFit.expand,
+
                         children: [
                           if (imageFile != null)
                             Image.file(
                               imageFile!,
-                              // fit: BoxFit.cover,
+
+                              fit: BoxFit.cover,
+
                             ),
                           ...bboxesWidgets,
                         ],
