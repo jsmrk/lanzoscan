@@ -3,8 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:widgets_to_image/widgets_to_image.dart';
-import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -13,7 +14,6 @@ import 'package:lanzoscan/label/labels.dart';
 import 'package:lanzoscan/model/yolo.dart';
 import 'package:lanzoscan/pages/library.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:gal/gal.dart';
 
 enum Choice { camera, gallery }
@@ -57,8 +57,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget buildImage(Uint8List bytes) => Image.memory(bytes);
 
-  final RoundedLoadingButtonController btnController =
-      RoundedLoadingButtonController();
+  late ValueNotifier<double> valueNotifier;
 
   final YoloModel model = YoloModel(
     'assets/models/yolov8n.tflite',
@@ -142,6 +141,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     model.init();
+    valueNotifier = ValueNotifier(0.0);
   }
 
   @override
@@ -216,28 +216,64 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       controller: controller,
                       child: resultWidget(bboxesWidgets),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 105),
-                      child: IconButton(
-                        onPressed: () async {
-                          final bytes = await controller.capture();
-                          setState(() {
-                            this.bytes = bytes;
-                          });
-                          await Gal.putImageBytes(bytes!);
-                          buildImage(bytes);
-                          isResultSaved = true;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Image Result Saved')));
-                        },
-                        icon: Container(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          splashColor: Colors.transparent,
+                          enableFeedback: false,
+                          isSelected: false,
+                          hoverColor: Colors.transparent,
+                          focusNode: FocusNode(),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LanzoScanWiki()),
+                            );
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
                             decoration: BoxDecoration(
-                                color: Colors.grey[300],
+                              color: Colors.amber[100],
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(15),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.book),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("More Details")
+                              ],
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            final bytes = await controller.capture();
+                            setState(() {
+                              this.bytes = bytes;
+                            });
+                            await Gal.putImageBytes(bytes!);
+                            buildImage(bytes);
+                            isResultSaved = true;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Image Result Saved')));
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            decoration: BoxDecoration(
+                                color: Colors.amber[100],
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(15))),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 10),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -247,8 +283,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 ),
                                 Text("Save to Gallery")
                               ],
-                            )),
-                      ),
+                            ),
+                          ),
+                        )
+                      ],
                     )
                   ],
                 )
@@ -293,7 +331,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-
   Widget resultWidget(List<Widget> bboxesWidgets) {
     return WidgetsToImage(
       controller: controller,
@@ -305,23 +342,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: SizedBox(
                 height: maxImageWidgetHeight,
                 child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    clipBehavior: Clip.hardEdge,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (imageFile != null)
-                          Image.file(
-                            imageFile!,
-                            fit: BoxFit.cover,
-                          ),
-                        ...bboxesWidgets,
-                      ],
-                    ),
-                  ),
-                ),
+                    padding: const EdgeInsets.all(15),
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusDirectional.circular(25),
+                      clipBehavior: Clip.hardEdge,
+                      child: Stack(
+                        // fit: StackFit.expand,
+                        children: [
+                          if (imageFile != null)
+                            Image.file(
+                              imageFile!,
+                              // fit: BoxFit.cover,
+                            ),
+                          ...bboxesWidgets,
+                        ],
+                      ),
+                    )),
               ),
             ),
             const SizedBox(
@@ -332,97 +368,101 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: isLoading
                   ? const SizedBox()
                   : bboxesWidgets.isNotEmpty
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'RESULT: ',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900),
-                      ),
-                      Text(
-                        labels[classes[0]]['name'].toString(),
-                        style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.amber[200],
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          "${(scores[0] * 100).toStringAsFixed(0)}%",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    'DESCRIPTION: ',
-                    style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  // Wrapping description text with a message bubble design
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.amber[200], // Background color of the bubble
-                      borderRadius: BorderRadius.circular(12), // Adjust as needed
-                    ),
-                    child: Text(
-                      labels[classes[0]]['description'].toString(),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Center(
-                    child: IconButton(
-                      onPressed: () async {
-                        final bytes = await controller.capture();
-                        setState(() {
-                          this.bytes = bytes;
-                        });
-                        await Gal.putImageBytes(bytes!);
-                        buildImage(bytes);
-                        isResultSaved = true;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Image Result Saved')));
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(15))),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : const SizedBox(), // Display an empty SizedBox if no labels detected
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Scan Result:',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    Text(
+                                      labels[classes[0]]['name'].toString(),
+                                      style: const TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 35),
+                                SimpleCircularProgressBar(
+                                  valueNotifier: valueNotifier,
+                                  mergeMode: true,
+                                  animationDuration: 2,
+                                  maxValue: 100,
+                                  size: 70,
+                                  progressStrokeWidth: 13,
+                                  backStrokeWidth: 13,
+                                  progressColors: const [
+                                    Color.fromARGB(255, 255, 238, 190),
+                                    Colors.amber
+                                  ],
+                                  onGetText: (double value) {
+                                    TextStyle centerTextStyle = const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black
+                                        // .withOpacity(value * 0.01),
+                                        );
+                                    return Text(
+                                      '${value.toInt()}%',
+                                      style: centerTextStyle,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            IconButton(
+                              splashColor: Colors.transparent,
+                              enableFeedback: false,
+                              isSelected: false,
+                              hoverColor: Colors.transparent,
+                              focusNode: FocusNode(),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LanzoScanWiki()),
+                                );
+                              },
+                              icon: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        labels[classes[0]]['description']
+                                            .toString(),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                        ),
+                                        textAlign: TextAlign.justify,
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                          ],
+                        )
+                      : const SizedBox(), // Display an empty SizedBox if no labels detected
             )
           ],
         ),
@@ -472,5 +512,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       bboxes = newBboxes;
       scores = newScores;
     });
+    valueNotifier.value = (scores[0] * 100).toDouble();
+  }
+
+  @override
+  void dispose() {
+    valueNotifier.dispose();
+    super.dispose();
   }
 }

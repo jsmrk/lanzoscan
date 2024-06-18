@@ -9,14 +9,14 @@ class Bbox extends StatelessWidget {
   final Color color;
 
   const Bbox(
-      this.x,
-      this.y,
-      this.width,
-      this.height,
-      this.score,
-      this.color, {
-        super.key,
-      });
+    this.x,
+    this.y,
+    this.width,
+    this.height,
+    this.score,
+    this.color, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +30,17 @@ class Bbox extends StatelessWidget {
           border: Border.all(color: color, width: 3),
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: Container(
-            color: color,
-            padding: const EdgeInsets.all(4.0),
-            child: Text(
-              '${(score * 100).toStringAsFixed(0)}%',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
+        // child: Align(
+        //   alignment: Alignment.topLeft,
+        //   child: Container(
+        //     color: color,
+        //     padding: const EdgeInsets.all(4.0),
+        //     child: Text(
+        //       '${(score * 100).toStringAsFixed(0)}%',
+        //       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        //     ),
+        //   ),
+        // ),
       ),
     );
   }

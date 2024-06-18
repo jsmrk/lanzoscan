@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lanzoscan/indroduce/splash.dart';
+import 'package:lanzoscan/pages/home.dart';
+import 'package:lanzoscan/pages/splash.dart';
 
 void main() {
   runApp(const MyApp());
