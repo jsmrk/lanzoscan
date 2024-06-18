@@ -5,7 +5,6 @@ class Bbox extends StatelessWidget {
   final double y;
   final double width;
   final double height;
-  final String label;
   final double score;
   final Color color;
 

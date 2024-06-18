@@ -168,7 +168,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             box[1] * resizeFactor,
             box[2] * resizeFactor,
             box[3] * resizeFactor,
-            labels[boxClass],
             scores[i],
             bboxesColors[boxClass]),
       );
@@ -347,7 +346,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
-
                         // fit: StackFit.expand,
 
                         children: [
@@ -355,7 +353,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                             Image.file(
                               imageFile!,
                               // fit: BoxFit.cover,
-
                             ),
                           ...bboxesWidgets,
                         ],
