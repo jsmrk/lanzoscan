@@ -5,20 +5,18 @@ class Bbox extends StatelessWidget {
   final double y;
   final double width;
   final double height;
-  final String label;
   final double score;
   final Color color;
 
   const Bbox(
-    this.x,
-    this.y,
-    this.width,
-    this.height,
-    this.label,
-    this.score,
-    this.color, {
-    super.key,
-  });
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.score,
+      this.color, {
+        super.key,
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +32,12 @@ class Bbox extends StatelessWidget {
         ),
         child: Align(
           alignment: Alignment.topLeft,
-          child: FittedBox(
-            child: Container(
-              color: color,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Text(label),
-                  // Text(' ${(score * 100).toStringAsFixed(0)}%'),
-                ],
-              ),
+          child: Container(
+            color: color,
+            padding: const EdgeInsets.all(4.0),
+            child: Text(
+              '${(score * 100).toStringAsFixed(0)}%',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ),
