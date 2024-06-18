@@ -164,13 +164,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       final boxClass = classes[i];
       bboxesWidgets.add(
         Bbox(
-          box[0] * resizeFactor,
-          box[1] * resizeFactor,
-          box[2] * resizeFactor,
-          box[3] * resizeFactor,
-          scores[i], // Pass only the score
-          bboxesColors[boxClass],
-        ),
+            box[0] * resizeFactor,
+            box[1] * resizeFactor,
+            box[2] * resizeFactor,
+            box[3] * resizeFactor,
+            labels[boxClass],
+            scores[i],
+            bboxesColors[boxClass]),
       );
     }
 
@@ -293,8 +293,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-
-  Widget resultWidget(List<Widget> bboxesWidgets) {
+  Widget resultWidget(bboxesWidgets) {
     return WidgetsToImage(
       controller: controller,
       child: Container(
@@ -305,125 +304,68 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: SizedBox(
                 height: maxImageWidgetHeight,
                 child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    clipBehavior: Clip.hardEdge,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (imageFile != null)
-                          Image.file(
-                            imageFile!,
-                            fit: BoxFit.cover,
-                          ),
-                        ...bboxesWidgets,
-                      ],
-                    ),
-                  ),
-                ),
+                    padding: const EdgeInsets.all(15),
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusDirectional.circular(25),
+                      clipBehavior: Clip.hardEdge,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (imageFile != null)
+                            Image.file(
+                              imageFile!,
+                              fit: BoxFit.cover,
+                            ),
+                          ...bboxesWidgets,
+                        ],
+                      ),
+                    )),
               ),
             ),
             const SizedBox(
               height: 15,
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: isLoading
-                  ? const SizedBox()
-                  : bboxesWidgets.isNotEmpty
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'RESULT: ',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900),
-                      ),
-                      Text(
-                        labels[classes[0]]['name'].toString(),
-                        style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.amber[200],
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          "${(scores[0] * 100).toStringAsFixed(0)}%",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    'DESCRIPTION: ',
-                    style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  // Wrapping description text with a message bubble design
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.amber[200], // Background color of the bubble
-                      borderRadius: BorderRadius.circular(12), // Adjust as needed
-                    ),
-                    child: Text(
-                      labels[classes[0]]['description'].toString(),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Center(
-                    child: IconButton(
-                      onPressed: () async {
-                        final bytes = await controller.capture();
-                        setState(() {
-                          this.bytes = bytes;
-                        });
-                        await Gal.putImageBytes(bytes!);
-                        buildImage(bytes);
-                        isResultSaved = true;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Image Result Saved')));
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(15))),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : const SizedBox(), // Display an empty SizedBox if no labels detected
-            )
+                child: isLoading
+                    ? const SizedBox()
+                    : Container(
+                        child: bboxesWidgets.isNotEmpty
+                            ? Column(
+                                children: [
+                                  Text(
+                                    labels[classes[0]].toString(),
+                                    style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w900),
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  CircularPercentIndicator(
+                                    radius: 65.0,
+                                    animation: true,
+                                    animationDuration: 1300,
+                                    restartAnimation: true,
+                                    lineWidth: 25.0,
+                                    addAutomaticKeepAlive: true,
+                                    percent: scores[0].toDouble(),
+                                    center: Text(
+                                      "${(scores[0] * 100).toStringAsFixed(0)}%",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0),
+                                    ),
+                                    circularStrokeCap: CircularStrokeCap.butt,
+                                    backgroundColor: Colors.grey,
+                                    progressColor: Colors.amber[200],
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              )
+                            : const SizedBox(), // Display an empty SizedBox if no labels detected
+                      ))
           ],
         ),
       ),
