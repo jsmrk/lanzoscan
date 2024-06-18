@@ -3,8 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:widgets_to_image/widgets_to_image.dart';
-import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -13,7 +14,6 @@ import 'package:lanzoscan/label/labels.dart';
 import 'package:lanzoscan/model/yolo.dart';
 import 'package:lanzoscan/pages/library.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:gal/gal.dart';
 
 enum Choice { camera, gallery }
@@ -57,8 +57,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget buildImage(Uint8List bytes) => Image.memory(bytes);
 
-  final RoundedLoadingButtonController btnController =
-      RoundedLoadingButtonController();
+  late ValueNotifier<double> valueNotifier;
 
   final YoloModel model = YoloModel(
     'assets/models/yolov8n.tflite',
@@ -142,6 +141,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     model.init();
+    valueNotifier = ValueNotifier(0.0);
   }
 
   @override
@@ -216,28 +216,64 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       controller: controller,
                       child: resultWidget(bboxesWidgets),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 105),
-                      child: IconButton(
-                        onPressed: () async {
-                          final bytes = await controller.capture();
-                          setState(() {
-                            this.bytes = bytes;
-                          });
-                          await Gal.putImageBytes(bytes!);
-                          buildImage(bytes);
-                          isResultSaved = true;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Image Result Saved')));
-                        },
-                        icon: Container(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          splashColor: Colors.transparent,
+                          enableFeedback: false,
+                          isSelected: false,
+                          hoverColor: Colors.transparent,
+                          focusNode: FocusNode(),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LanzoScanWiki()),
+                            );
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
                             decoration: BoxDecoration(
-                                color: Colors.grey[300],
+                              color: Colors.amber[100],
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(15),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.book),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("More Details")
+                              ],
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            final bytes = await controller.capture();
+                            setState(() {
+                              this.bytes = bytes;
+                            });
+                            await Gal.putImageBytes(bytes!);
+                            buildImage(bytes);
+                            isResultSaved = true;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Image Result Saved')));
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            decoration: BoxDecoration(
+                                color: Colors.amber[100],
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(15))),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 10),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -247,8 +283,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 ),
                                 Text("Save to Gallery")
                               ],
-                            )),
-                      ),
+                            ),
+                          ),
+                        )
+                      ],
                     )
                   ],
                 )
@@ -293,7 +331,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget resultWidget(bboxesWidgets) {
+  Widget resultWidget(List<Widget> bboxesWidgets) {
     return WidgetsToImage(
       controller: controller,
       child: Container(
@@ -309,12 +347,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
-                        fit: StackFit.expand,
+
+                        // fit: StackFit.expand,
+
                         children: [
                           if (imageFile != null)
                             Image.file(
                               imageFile!,
-                              fit: BoxFit.cover,
+                              // fit: BoxFit.cover,
+
                             ),
                           ...bboxesWidgets,
                         ],
@@ -326,46 +367,106 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               height: 15,
             ),
             Container(
-                child: isLoading
-                    ? const SizedBox()
-                    : Container(
-                        child: bboxesWidgets.isNotEmpty
-                            ? Column(
-                                children: [
-                                  Text(
-                                    labels[classes[0]].toString(),
-                                    style: const TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w900),
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  CircularPercentIndicator(
-                                    radius: 65.0,
-                                    animation: true,
-                                    animationDuration: 1300,
-                                    restartAnimation: true,
-                                    lineWidth: 25.0,
-                                    addAutomaticKeepAlive: true,
-                                    percent: scores[0].toDouble(),
-                                    center: Text(
-                                      "${(scores[0] * 100).toStringAsFixed(0)}%",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: isLoading
+                  ? const SizedBox()
+                  : bboxesWidgets.isNotEmpty
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Scan Result:',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                      ),
                                     ),
-                                    circularStrokeCap: CircularStrokeCap.butt,
-                                    backgroundColor: Colors.grey,
-                                    progressColor: Colors.amber[200],
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                ],
-                              )
-                            : const SizedBox(), // Display an empty SizedBox if no labels detected
-                      ))
+                                    Text(
+                                      labels[classes[0]]['name'].toString(),
+                                      style: const TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 35),
+                                SimpleCircularProgressBar(
+                                  valueNotifier: valueNotifier,
+                                  mergeMode: true,
+                                  animationDuration: 2,
+                                  maxValue: 100,
+                                  size: 70,
+                                  progressStrokeWidth: 13,
+                                  backStrokeWidth: 13,
+                                  progressColors: const [
+                                    Color.fromARGB(255, 255, 238, 190),
+                                    Colors.amber
+                                  ],
+                                  onGetText: (double value) {
+                                    TextStyle centerTextStyle = const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black
+                                        // .withOpacity(value * 0.01),
+                                        );
+                                    return Text(
+                                      '${value.toInt()}%',
+                                      style: centerTextStyle,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            IconButton(
+                              splashColor: Colors.transparent,
+                              enableFeedback: false,
+                              isSelected: false,
+                              hoverColor: Colors.transparent,
+                              focusNode: FocusNode(),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LanzoScanWiki()),
+                                );
+                              },
+                              icon: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        labels[classes[0]]['description']
+                                            .toString(),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                        ),
+                                        textAlign: TextAlign.justify,
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                          ],
+                        )
+                      : const SizedBox(), // Display an empty SizedBox if no labels detected
+            )
           ],
         ),
       ),
@@ -414,5 +515,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       bboxes = newBboxes;
       scores = newScores;
     });
+    valueNotifier.value = (scores[0] * 100).toDouble();
+  }
+
+  @override
+  void dispose() {
+    valueNotifier.dispose();
+    super.dispose();
   }
 }

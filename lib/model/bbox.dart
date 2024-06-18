@@ -14,7 +14,6 @@ class Bbox extends StatelessWidget {
     this.y,
     this.width,
     this.height,
-    this.label,
     this.score,
     this.color, {
     super.key,
@@ -32,21 +31,17 @@ class Bbox extends StatelessWidget {
           border: Border.all(color: color, width: 3),
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: FittedBox(
-            child: Container(
-              color: color,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Text(label),
-                  // Text(' ${(score * 100).toStringAsFixed(0)}%'),
-                ],
-              ),
-            ),
-          ),
-        ),
+        // child: Align(
+        //   alignment: Alignment.topLeft,
+        //   child: Container(
+        //     color: color,
+        //     padding: const EdgeInsets.all(4.0),
+        //     child: Text(
+        //       '${(score * 100).toStringAsFixed(0)}%',
+        //       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        //     ),
+        //   ),
+        // ),
       ),
     );
   }
