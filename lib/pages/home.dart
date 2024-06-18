@@ -74,8 +74,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future<File?> getImageFromGallery() async {
-    final XFile? newImageFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? newImageFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
     if (newImageFile != null) {
       setState(() {
         imageFile = File(newImageFile.path);
@@ -280,7 +281,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 SizedBox(
                                   width: 5,
                                 ),
-                                Text("Save to Gallery")
+                                Text("Save Result")
                               ],
                             ),
                           ),
@@ -333,21 +334,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget resultWidget(List<Widget> bboxesWidgets) {
     return WidgetsToImage(
       controller: controller,
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Center(
-              child: SizedBox(
-                height: maxImageWidgetHeight,
-                child: Padding(
-                    padding: const EdgeInsets.all(15),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Center(
+                child: SizedBox(
+                  height: maxImageWidgetHeight,
+                  child: Container(
                     child: ClipRRect(
                       borderRadius: BorderRadiusDirectional.circular(25),
                       clipBehavior: Clip.hardEdge,
                       child: Stack(
                         // fit: StackFit.expand,
-
                         children: [
                           if (imageFile != null)
                             Image.file(
@@ -357,87 +358,76 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           ...bboxesWidgets,
                         ],
                       ),
-                    )),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: isLoading
-                  ? const SizedBox()
-                  : bboxesWidgets.isNotEmpty
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Scan Result:',
-                                      style: TextStyle(
-                                        fontSize: 15,
+              const SizedBox(
+                height: 35,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: isLoading
+                    ? const SizedBox()
+                    : bboxesWidgets.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Scan Result:',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      labels[classes[0]]['name'].toString(),
-                                      style: const TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w700),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 35),
-                                SimpleCircularProgressBar(
-                                  valueNotifier: valueNotifier,
-                                  mergeMode: true,
-                                  animationDuration: 2,
-                                  maxValue: 100,
-                                  size: 70,
-                                  progressStrokeWidth: 13,
-                                  backStrokeWidth: 13,
-                                  progressColors: const [
-                                    Color.fromARGB(255, 255, 238, 190),
-                                    Colors.amber
-                                  ],
-                                  onGetText: (double value) {
-                                    TextStyle centerTextStyle = const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.black
-                                        // .withOpacity(value * 0.01),
-                                        );
-                                    return Text(
-                                      '${value.toInt()}%',
-                                      style: centerTextStyle,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            IconButton(
-                              splashColor: Colors.transparent,
-                              enableFeedback: false,
-                              isSelected: false,
-                              hoverColor: Colors.transparent,
-                              focusNode: FocusNode(),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LanzoScanWiki()),
-                                );
-                              },
-                              icon: Padding(
+                                      Text(
+                                        labels[classes[0]]['name'].toString(),
+                                        style: const TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 35),
+                                  SimpleCircularProgressBar(
+                                    valueNotifier: valueNotifier,
+                                    mergeMode: true,
+                                    animationDuration: 2,
+                                    maxValue: 100,
+                                    size: 70,
+                                    progressStrokeWidth: 13,
+                                    backStrokeWidth: 13,
+                                    progressColors: const [
+                                      Color.fromARGB(255, 255, 238, 190),
+                                      Colors.amber
+                                    ],
+                                    onGetText: (double value) {
+                                      TextStyle centerTextStyle =
+                                          const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w900,
+                                              color: Colors.black
+                                              // .withOpacity(value * 0.01),
+                                              );
+                                      return Text(
+                                        '${value.toInt()}%',
+                                        style: centerTextStyle,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 15, vertical: 5),
                                   child: Column(
@@ -456,15 +446,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       ),
                                     ],
                                   )),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                          ],
-                        )
-                      : const SizedBox(), // Display an empty SizedBox if no labels detected
-            )
-          ],
+                              const SizedBox(
+                                height: 5,
+                              ),
+                            ],
+                          )
+                        : const SizedBox(), // Display an empty SizedBox if no labels detected
+              )
+            ],
+          ),
         ),
       ),
     );
