@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lanzoscan/indroduce/splash.dart';
+import 'package:lanzoscan/screen/splash.dart';
 
 void main() {
   runApp(const MyApp());

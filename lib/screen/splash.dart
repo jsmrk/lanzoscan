@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:lanzoscan/pages/home.dart';
+import 'package:lanzoscan/screen/detection.dart';
 
 
 class Splashscreen extends StatefulWidget {
