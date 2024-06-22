@@ -503,7 +503,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       scores = newScores;
     });
 
-    valueNotifier.value = scores[0] == 0 ? 0.0 : (scores[0] * 100).toDouble();
+    if (scores.isNotEmpty) {
+      valueNotifier.value = (scores[0] * 100).toDouble();
+    }
+
+    //valueNotifier.value = scores[0] == 0 ? 0.0 : (scores[0] * 100).toDouble();
   }
 
   @override
