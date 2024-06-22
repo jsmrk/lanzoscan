@@ -113,9 +113,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       imageHeight = image.height;
       inferenceOutput = model.infer(image);
       updatePostprocess();
-      // setState(() {
-      //   isLoading = false;
-      // });
       showDelayedLoading();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +172,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     }
 
     WidgetsToImageController controller = WidgetsToImageController();
-    // to save image bytes of widget
 
     return Scaffold(
       appBar: AppBar(
@@ -460,6 +456,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
+  Widget invalidImage() {
+    return const Text('You have updloaded an invalid image');
+  }
+
   Widget _buildFloatingButton() {
     return SpeedDial(
       animatedIcon: AnimatedIcons.menu_close,
@@ -484,7 +484,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   void updatePostprocess() {
     if (inferenceOutput == null) {
-      return;
+      return null;
     }
     List<int> newClasses = [];
     List<List<double>> newBboxes = [];
@@ -502,7 +502,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       bboxes = newBboxes;
       scores = newScores;
     });
-    valueNotifier.value = (scores[0] * 100).toDouble();
+
+    valueNotifier.value = scores[0] == 0 ? 0.0 : (scores[0] * 100).toDouble();
   }
 
   @override
