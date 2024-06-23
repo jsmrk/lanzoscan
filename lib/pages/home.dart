@@ -28,6 +28,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   ValueNotifier<bool> expandedValue = ValueNotifier(false);
 
+  bool isInvalidImage = false;
   bool isLoading = false;
   bool isResultSaved = false;
 
@@ -212,78 +213,83 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       controller: controller,
                       child: resultWidget(bboxesWidgets),
                     ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          splashColor: Colors.transparent,
-                          enableFeedback: false,
-                          isSelected: false,
-                          hoverColor: Colors.transparent,
-                          focusNode: FocusNode(),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LanzoScanWiki()),
-                            );
-                          },
-                          icon: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.amber[100],
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(15),
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.book),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text("More Details")
-                              ],
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            final bytes = await controller.capture();
-                            setState(() {
-                              this.bytes = bytes;
-                            });
-                            await Gal.putImageBytes(bytes!);
-                            buildImage(bytes);
-                            isResultSaved = true;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Image Result Saved')));
-                          },
-                          icon: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            decoration: BoxDecoration(
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    if (bboxes.isNotEmpty)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            splashColor: Colors.transparent,
+                            enableFeedback: false,
+                            isSelected: false,
+                            hoverColor: Colors.transparent,
+                            focusNode: FocusNode(),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const LanzoScanWiki()),
+                              );
+                            },
+                            icon: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              decoration: BoxDecoration(
                                 color: Colors.amber[100],
                                 borderRadius: const BorderRadius.all(
-                                    Radius.circular(15))),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.save),
-                                SizedBox(
-                                  width: 5,
+                                  Radius.circular(15),
                                 ),
-                                Text("Save Result")
-                              ],
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.book),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text("More Details")
+                                ],
+                              ),
                             ),
                           ),
-                        )
-                      ],
-                    )
+                          IconButton(
+                            onPressed: () async {
+                              final bytes = await controller.capture();
+                              setState(() {
+                                this.bytes = bytes;
+                              });
+                              await Gal.putImageBytes(bytes!);
+                              buildImage(bytes);
+                              isResultSaved = true;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Image Result Saved')));
+                            },
+                            icon: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              decoration: BoxDecoration(
+                                  color: Colors.amber[100],
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(15))),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.save),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text("Save Result")
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      )
                   ],
                 )
               : Center(
@@ -328,6 +334,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget resultWidget(List<Widget> bboxesWidgets) {
+    final double borderThickness = 5.0; // Set the border thickness here
+    final double borderRadius = 25.0; // Set the border radius here
+
     return WidgetsToImage(
       controller: controller,
       child: Padding(
@@ -339,20 +348,31 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               Center(
                 child: SizedBox(
                   height: maxImageWidgetHeight,
-                  child: Container(
-                    child: ClipRRect(
-                      borderRadius: BorderRadiusDirectional.circular(25),
-                      clipBehavior: Clip.hardEdge,
-                      child: Stack(
-                        // fit: StackFit.expand,
-                        children: [
-                          if (imageFile != null)
-                            Image.file(
-                              imageFile!,
-                              // fit: BoxFit.cover,
-                            ),
-                          ...bboxesWidgets,
-                        ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: bboxesWidgets.isEmpty
+                              ? Colors.red
+                              : Colors.transparent,
+                          width: bboxesWidgets.isEmpty
+                              ? borderThickness
+                              : 0.0, // Apply border thickness
+                        ),
+                        borderRadius: BorderRadius.circular(borderRadius),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(borderRadius),
+                        child: Stack(
+                          children: [
+                            if (imageFile != null)
+                              Image.file(
+                                imageFile!,
+                              ),
+                            ...bboxesWidgets,
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -407,11 +427,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                     onGetText: (double value) {
                                       TextStyle centerTextStyle =
                                           const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.black
-                                              // .withOpacity(value * 0.01),
-                                              );
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black,
+                                      );
                                       return Text(
                                         '${value.toInt()}%',
                                         style: centerTextStyle,
@@ -424,31 +443,83 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 height: 15,
                               ),
                               Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 5),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        labels[classes[0]]['description']
-                                            .toString(),
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                        ),
-                                        textAlign: TextAlign.justify,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      labels[classes[0]]['description']
+                                          .toString(),
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.black,
                                       ),
-                                    ],
-                                  )),
+                                      textAlign: TextAlign.justify,
+                                    ),
+                                  ],
+                                ),
+                              ),
                               const SizedBox(
                                 height: 5,
                               ),
                             ],
                           )
-                        : const SizedBox(), // Display an empty SizedBox if no labels detected
-              )
+                        : const Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.red,
+                                    size: 35,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Invalid image ',
+                                    style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                  height: 35), // Add spacing between the texts
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.warning,
+                                    color: Colors.orange,
+                                    size: 40,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      'Please upload a valid image that contains a lanzones leaf.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+              ),
             ],
           ),
         ),
