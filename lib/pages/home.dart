@@ -334,8 +334,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget resultWidget(List<Widget> bboxesWidgets) {
-    final double borderThickness = 5.0; // Set the border thickness here
-    final double borderRadius = 25.0; // Set the border radius here
+    final double borderThickness = 5.0;
+    final double borderRadius = 25.0;
+
+    bool isHealthyLeaf =
+        classes.isNotEmpty && labels[classes[0]]['name'] == 'Healthy';
 
     return WidgetsToImage(
       controller: controller,
@@ -356,9 +359,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           color: bboxesWidgets.isEmpty
                               ? Colors.red
                               : Colors.transparent,
-                          width: bboxesWidgets.isEmpty
-                              ? borderThickness
-                              : 0.0, // Apply border thickness
+                          width: bboxesWidgets.isEmpty ? borderThickness : 0.0,
                         ),
                         borderRadius: BorderRadius.circular(borderRadius),
                       ),
@@ -411,32 +412,33 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(width: 35),
-                                  SimpleCircularProgressBar(
-                                    valueNotifier: valueNotifier,
-                                    mergeMode: true,
-                                    animationDuration: 2,
-                                    maxValue: 100,
-                                    size: 70,
-                                    progressStrokeWidth: 13,
-                                    backStrokeWidth: 13,
-                                    progressColors: const [
-                                      Color.fromARGB(255, 255, 238, 190),
-                                      Colors.amber
-                                    ],
-                                    onGetText: (double value) {
-                                      TextStyle centerTextStyle =
-                                          const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.black,
-                                      );
-                                      return Text(
-                                        '${value.toInt()}%',
-                                        style: centerTextStyle,
-                                      );
-                                    },
-                                  ),
+                                  if (!isHealthyLeaf) const SizedBox(width: 35),
+                                  if (!isHealthyLeaf)
+                                    SimpleCircularProgressBar(
+                                      valueNotifier: valueNotifier,
+                                      mergeMode: true,
+                                      animationDuration: 2,
+                                      maxValue: 100,
+                                      size: 70,
+                                      progressStrokeWidth: 13,
+                                      backStrokeWidth: 13,
+                                      progressColors: const [
+                                        Color.fromARGB(255, 255, 238, 190),
+                                        Colors.amber
+                                      ],
+                                      onGetText: (double value) {
+                                        TextStyle centerTextStyle =
+                                            const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.black,
+                                        );
+                                        return Text(
+                                          '${value.toInt()}%',
+                                          style: centerTextStyle,
+                                        );
+                                      },
+                                    ),
                                 ],
                               ),
                               const SizedBox(
@@ -490,8 +492,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                   ),
                                 ],
                               ),
-                              SizedBox(
-                                  height: 35), // Add spacing between the texts
+                              SizedBox(height: 35),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
